@@ -1,10 +1,7 @@
-## Meteor Desktop Plugin Test Suite
+## Meteor Desktop test suite
 
-Few utils to ease out functional testing of Meteor Desktop plugins.
+Few utils to ease out functional testing of Meteor Desktop modules/plugins.
 Take a look at the examples at the bottom of this readme to actually see how you can use this.
-
-### `getElectronPath`
-Returns path to electron bin.
 
 ### `createTestApp(installPath, pluginName)`
 Creates a test app with plugin you are testing included. Plugin is installed by `npm`.
@@ -45,7 +42,7 @@ Sends an IPC event to your module. Equivalent of `Desktop.send`.
 
 ### `fetch(app, module, event, ...args)`
 Fetches some data from main process by sending an IPC event and waiting for the response.
-Equivalent of `Desktop.fetch`.
+Equivalent of `Desktop.fetch`. Promise will resolve to an array with payload that came with the response. 
 ```javascript
 /**
  * @param {Object} app    - app ref from Spectron

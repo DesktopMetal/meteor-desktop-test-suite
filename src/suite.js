@@ -4,15 +4,9 @@ import shell from 'shelljs';
 import fs from 'fs';
 import spawn from 'cross-spawn';
 import semver from 'semver';
+import tmp from 'tmp';
 
-/**
- * Returns path to electron bin.
- */
-export function getElectronPath() {
-    let electronPath = path.join(__dirname, '..', '..', '.bin', 'electron');
-    if (process.platform === 'win32') electronPath += '.cmd';
-    return electronPath;
-}
+shell.config.fatal = true;
 
 /**
  * Looks for npm.
@@ -63,7 +57,7 @@ const npm = getNpm();
 export function createTestApp(installPath, pluginName) {
     shell.rm('-rf', installPath);
     shell.mkdir(installPath);
-    shell.cp('-rf', path.join(__dirname, '..', 'app', '*'), installPath);
+    shell.cp('-rf', path.join(__dirname, '..', 'apps', 'plugin-test-app', '*'), installPath);
     const packageJson = path.join(installPath, 'package.json');
     const indexJs = path.join(installPath, 'index.js');
 
@@ -82,6 +76,47 @@ export function createTestApp(installPath, pluginName) {
         });
     });
 }
+
+/**
+ * Creates a test app with your desktop.asar included. Will only load specified module.
+ *
+ * @param {string} installPath - path at which to install the app
+ * @param {string} moduleDir  - name of the npm package (plugin) you are testing
+ * @returns {string}
+ */
+export function createTestAppWithModule(installPath, moduleDir) {
+    let appPath = installPath;
+    if (installPath === null) {
+        appPath = tmp.dirSync().name;
+    }
+    const module = JSON.parse(fs.readFileSync(path.join(moduleDir, 'module.json'), 'UTF-8'));
+    // const moduleDirName = path.parse(moduleDir).name;
+
+    shell.rm('-rf', appPath);
+    shell.mkdir(appPath);
+    shell.cp('-rf', path.join(__dirname, '..', 'apps', 'module-test-app', '*'), appPath);
+    shell.cp('-rf', path.join(moduleDir, '*'), appPath);
+
+    const packageJsonPath = path.join(appPath, 'package.json');
+
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'UTF-8'));
+    packageJson.dependencies = module.dependencies;
+    packageJson.dependencies.reify = '0.3.8';
+
+    fs.writeFileSync(
+        packageJsonPath, JSON.stringify(packageJson)
+    );
+
+    return new Promise((resolve) => {
+        spawn(npm, ['install'], {
+            cwd: path.join(path.resolve(appPath)),
+            stdio: 'inherit'
+        }).on('exit', () => {
+            resolve(appPath);
+        });
+    });
+}
+
 
 /**
  * Sends an IPC message to the main process.
@@ -156,7 +191,9 @@ export function fireEventsBusEventAndWaitForAnother(
     app, eventToFire, eventToListenFor, ...eventArgs
 ) {
     return sendIpcSync(app, 'listenToEventOnEventBus', eventToListenFor)
-        .then(() => sendIpcAndWaitForResponse(app, 'fireEventsBusEvent', `eventsBusEvent_${eventToListenFor}`, eventToFire, ...eventArgs));
+        .then(() => sendIpcAndWaitForResponse(
+            app, 'fireEventsBusEvent', `eventsBusEvent_${eventToListenFor}`,
+            eventToFire, ...eventArgs));
 }
 
 /**
@@ -166,6 +203,10 @@ export function fireEventsBusEventAndWaitForAnother(
  */
 export function constructPlugin(app, ...args) {
     return sendIpcSync(app, 'constructPlugin', ...args);
+}
+
+export function constructModule(app, ...args) {
+    return constructPlugin(app, ...args);
 }
 
 
@@ -185,13 +226,6 @@ export function waitForIpc(app, eventToListenFor) {
     }, app.api.requireName, eventToListenFor);
     /* eslint-enable */
 }
-
-export function waitForEventsBusEvent(app, eventToListenFor) {
-    return sendIpcSync(app, 'listenToEventOnEventBus', eventToListenFor).then(
-        () => waitForIpc(app, `eventBusEvent_${eventToListenFor}`)
-    );
-}
-
 
 let fetchCallCounter = 0;
 
@@ -217,6 +251,7 @@ export function fetch(app, module, event, ...args) {
             .then((result) => {
                 if (result.value) {
                     if (result.value[1] === fetchId) {
+                        result.value.splice(0, 2);
                         resolve(result.value);
                     } else {
                         reject('wrong fetchId in the ipc response');
@@ -272,16 +307,16 @@ export class Logger {
 }
 
 module.exports = {
-    getElectronPath,
     constructPlugin,
+    constructModule,
     sendIpc,
     sendIpcSync,
     createTestApp,
+    createTestAppWithModule,
     send,
     fireEventsBusEvent,
     fireEventsBusEventAndWaitForAnother,
     waitForIpc,
-    waitForEventsBusEvent,
     fetch,
     sendIpcAndWaitForResponse,
     Logger

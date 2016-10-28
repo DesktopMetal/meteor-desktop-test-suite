@@ -80,20 +80,33 @@ app.on('ready', () => {
     mainWindow.on('closed', () => (mainWindow = null));
 });
 
+const skeletonAppMock = {
+    removeUncaughtExceptionListener: () => {
+    }
+};
+
 ipcMain.on(
     'constructPlugin',
     (event, ...args) => {
         sender = event.sender;
         args = args.map(arg => ((arg === null) ? undefined : arg));
         const [$log = new Logger(false, false),
-            $app = app,
+            $skeletonApp = skeletonAppMock,
             $appSettings = {},
             $eventsBus = eventsBus,
             $modules = {},
             $settings = {},
             $Module = Module] = args;
-        plugin = new PluginUnderTest($log, $app, $appSettings, $eventsBus,
-            $modules, $settings, $Module);
+
+        plugin = new PluginUnderTest({
+            log: $log,
+            skeletonApp: $skeletonApp,
+            appSettings: $appSettings,
+            eventsBus: $eventsBus,
+            modules: $modules,
+            settings: $settings,
+            Module: $Module
+        });
         event.returnValue = true;
     }
 );
