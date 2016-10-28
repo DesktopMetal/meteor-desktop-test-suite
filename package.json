@@ -1,6 +1,6 @@
 {
   "name": "meteor-desktop-test-suite",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "engines": {
     "node": ">=4.0.0"
   },
