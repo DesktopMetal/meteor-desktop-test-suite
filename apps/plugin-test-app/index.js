@@ -85,6 +85,11 @@ const skeletonAppMock = {
     }
 };
 
+ipcMain.on('emitWindowCreated', (event) => {
+    eventsBus.emit('windowCreated', mainWindow);
+    event.returnValue = true;
+});
+
 ipcMain.on(
     'constructPlugin',
     (event, ...args) => {

@@ -306,6 +306,10 @@ export class Logger {
     }
 }
 
+export function emitWindowCreated(app) {
+    return sendIpcSync(app, 'emitWindowCreated');
+}
+
 module.exports = {
     constructPlugin,
     constructModule,
@@ -319,5 +323,6 @@ module.exports = {
     waitForIpc,
     fetch,
     sendIpcAndWaitForResponse,
-    Logger
+    Logger,
+    emitWindowCreated
 };

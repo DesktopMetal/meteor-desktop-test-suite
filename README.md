@@ -89,6 +89,15 @@ Sends an IPC event and waits for an another IPC event to come.
  */
 ```
 
+### `emitWindowCreated(app)`
+Makes the app emit `windowCreated` event.
+```javascript
+/**
+ * @param {Object} app - the app ref from Spectron
+ * @returns {Promise}
+ */
+```
+
 ### `class Logger(show, showErrors)`
 Fake logger that eventually can write the logs to the console. You can set `show` to `false` and `showErrors` to `true` to only see errors passed to it. 
 

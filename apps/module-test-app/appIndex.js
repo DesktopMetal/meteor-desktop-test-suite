@@ -113,6 +113,11 @@ ipcMain.on(
     }
 );
 
+ipcMain.on('emitWindowCreated', (event) => {
+    eventsBus.emit('windowCreated', mainWindow);
+    event.returnValue = true;
+});
+
 ipcMain.on('fireEventsBusEvent', (event, eventsBusEvent, ...args) => {
     sender = event.sender;
     console.log(`emitting ${eventsBusEvent} to the events bus`);
