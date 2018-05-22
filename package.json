@@ -1,8 +1,8 @@
 {
   "name": "meteor-desktop-test-suite",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=8.0.0"
   },
   "description": "Few utils to ease out functional testing of Meteor Desktop modules/plugins.",
   "main": "dist/suite.js",
