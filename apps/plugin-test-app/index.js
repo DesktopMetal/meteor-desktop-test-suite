@@ -12,6 +12,35 @@ const Module = require('./module');
 
 let plugin; // eslint-disable-line no-unused-vars
 
+const logFile = fs.openSync('log.txt', 'w');
+
+function saveLog(...args) {
+    args = args.map(arg => `${arg}`);
+    fs.writeSync(logFile, `${args.join(' ')}\n`, 'utf-8');
+}
+
+const {
+    debug, log, warn, error
+} = console;
+
+console.log = (...args) => {
+    saveLog(...args);
+    log(...args);
+};
+console.warn = (...args) => {
+    saveLog(...args);
+    warn(...args);
+};
+console.error = (...args) => {
+    saveLog(...args);
+    error(...args);
+};
+console.debug = (...args) => {
+    saveLog(...args);
+    debug(...args);
+};
+
+
 class Logger {
     constructor(show, showErrors) {
         this.show = show;
@@ -93,6 +122,7 @@ ipcMain.on('emitWindowCreated', (event) => {
 ipcMain.on(
     'constructPlugin',
     (event, ...args) => {
+        console.log('constructing plugin');
         sender = event.sender;
         args = args.map(arg => ((arg === null) ? undefined : arg));
         const [$log = new Logger(false, false),
@@ -117,6 +147,7 @@ ipcMain.on(
 );
 
 ipcMain.on('fireEventsBusEvent', (event, eventsBusEvent, ...args) => {
+    console.log(`fire events bus event: ${eventsBusEvent}`);
     sender = event.sender;
     console.log(`emitting ${eventsBusEvent} to the events bus`);
     eventsBus.emit(eventsBusEvent, ...args);
@@ -133,4 +164,9 @@ ipcMain.on('listenToEventOnEventBus', (event, eventsBusEvent) => {
     event.returnValue = true;
 });
 
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', () => {
+    fs.closeSync(logFile);
+    app.quit();
+});
+
+console.log('test app start');
