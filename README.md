@@ -104,3 +104,7 @@ Fake logger that eventually can write the logs to the console. You can set `show
 ## Examples
 
 An example of usage in tests is here [meteor-desktop-splash-screen](https://github.com/wojtkowiak/meteor-desktop-splash-screen/blob/master/tests/functional/test.js) and here [meteor-desktop-localstorage](https://github.com/wojtkowiak/meteor-desktop-localstorage/blob/master/tests/functional/test.js).
+
+## Changelog
+
+* `0.2.0` - plugins tests now save console output to `log.txt`
