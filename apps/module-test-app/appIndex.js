@@ -80,8 +80,8 @@ app.on('ready', () => {
 });
 
 const skeletonAppMock = {
-    removeUncaughtExceptionListener: () => {
-    }
+    removeUncaughtExceptionListener: () => {},
+    isProduction: () => false
 };
 
 ipcMain.on(
