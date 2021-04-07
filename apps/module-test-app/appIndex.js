@@ -71,7 +71,11 @@ app.on('ready', () => {
         x: 1,
         y: 1,
         width: 1,
-        height: 1
+        height: 1,
+        webPreferences: {
+            nodeIntegration: true 
+        }
+
     });
 
     mainWindow.loadURL(`file://${__dirname}/index.html`);
